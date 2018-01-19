@@ -149,11 +149,38 @@ function getTrucker(truckerId){
 
 	var retour = null;
 	truckers.forEach(function(trucker){
-		if(trucker.id == truckerId){
+		if(trucker.id === truckerId){
 			retour = trucker;
 		}
 	});
 	return retour;
+}
+
+function getActors(deliveryId){
+	var retour = null;
+	actors.forEach(function(actor){
+		if(actor.deliveryId === deliveryId)
+		{
+			retour = actor;
+		}
+	})
+	return retour;
+}
+
+function setTransaction(transac, amount, actorName){
+	var retour = null;
+	transac.payment.forEach(function(actor){
+		if(actorName === actor.who){
+			actor.amount = amount;
+
+			var type = "credit";
+			if(amount < 0){
+				type = "debit";
+			}
+
+			actor.type = type;
+		}
+	});
 }
 
 function calculate(delivery){
@@ -194,7 +221,7 @@ function calculate(delivery){
 	var treasury = 1 + Math.trunc(distance / 500);
 	var convargo = commission - insurance - treasury;
 
-	console.log(price);
+	var truckerAmount = price - commission;
 
 	if(deductibleOption)
 	{
@@ -202,11 +229,25 @@ function calculate(delivery){
 		convargo += volume;
 	}
 
-	console.log(price);
 	delivery.price = price;
 	delivery.commission.insurance = insurance;
 	delivery.commission.treasury = treasury;
 	delivery.commission.convargo = convargo;
+
+	var shipperAmount = price;
+	var insuranceAmount = insurance;
+	var treasuryAmount = treasury;
+	var convargoAmount = convargo;
+
+	var transac = getActors(delivery.id);
+	setTransaction(transac, shipperAmount, "shipper");
+	setTransaction(transac, truckerAmount, "trucker");
+	setTransaction(transac, treasuryAmount, "treasury");
+	setTransaction(transac, insuranceAmount, "insurance");
+	setTransaction(transac, convargoAmount, "convargo");
+
+	console.log(transac);
+
 }
 
 deliveries.forEach(function(delivery){
