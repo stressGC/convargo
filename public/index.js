@@ -145,6 +145,65 @@ const actors = [{
   }]
 }];
 
-console.log(truckers);
-console.log(deliveries);
-console.log(actors);
+function getTrucker(id)
+{
+	var trucker = null;
+	truckers.forEach(function(e){
+		if(e.id == id){
+			trucker = e;
+		}
+	});
+	return trucker;
+}
+
+// STEP 1
+function stepOne(e){
+	var trucker = getTrucker(e.truckerId);
+
+	var distance = e.distance;
+	var distancePrice = distance * trucker.pricePerKm;
+
+	var volume = e.volume;
+	var volumePrice = volume * trucker.pricePerVolume;
+
+	var price = distance * volume;
+
+	e.price = price;
+}
+
+function stepTwo(e){
+	var trucker = getTrucker(e.truckerId);
+	var distance = e.distance;
+	var distancePrice = distance * trucker.pricePerKm;
+
+	var volume = e.volume;
+	var volumePrice = volume * trucker.pricePerVolume;
+	
+	var decreasePercent = 0;
+
+	if(volume > 25)
+	{
+		decreasePercent = 50;
+	}
+	else if(volume > 10)
+	{
+		decreasePercent = 30;
+	}
+	else if(volume > 5)
+	{
+		decreasePercent = 10;
+	}
+
+	var priceBeforeDecrease = (distance * volume);
+	var price = priceBeforeDecrease*(100-decreasePercent)/100;
+
+	console.log(decreasePercent+"% from "+ priceBeforeDecrease +" to "+price);
+
+	e.price = price;
+}
+
+deliveries.forEach(function(e){
+	//stepOne(e);
+	stepTwo(e);
+	console.log(e);
+});
