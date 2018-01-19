@@ -145,40 +145,26 @@ const actors = [{
   }]
 }];
 
-function getTrucker(id)
-{
-	var trucker = null;
-	truckers.forEach(function(e){
-		if(e.id == id){
-			trucker = e;
+function getTrucker(truckerId){
+
+	var retour = null;
+	truckers.forEach(function(trucker){
+		if(trucker.id == truckerId){
+			retour = trucker;
 		}
 	});
-	return trucker;
+	return retour;
 }
 
-// STEP 1
-function stepOne(e){
-	var trucker = getTrucker(e.truckerId);
+function calculate(delivery){
 
-	var distance = e.distance;
+	var trucker = getTrucker(delivery.truckerId);
+
+	var distance = delivery.distance;
 	var distancePrice = distance * trucker.pricePerKm;
 
-	var volume = e.volume;
-	var volumePrice = volume * trucker.pricePerVolume;
+	var volume = delivery.volume;
 
-	var price = distance * volume;
-
-	e.price = price;
-}
-
-function stepTwo(e){
-	var trucker = getTrucker(e.truckerId);
-	var distance = e.distance;
-	var distancePrice = distance * trucker.pricePerKm;
-
-	var volume = e.volume;
-	var volumePrice = volume * trucker.pricePerVolume;
-	
 	var decreasePercent = 0;
 
 	if(volume > 25)
@@ -194,16 +180,24 @@ function stepTwo(e){
 		decreasePercent = 10;
 	}
 
-	var priceBeforeDecrease = (distance * volume);
-	var price = priceBeforeDecrease*(100-decreasePercent)/100;
+	var volumePrice = (volume * trucker.pricePerVolume) * (100 - decreasePercent) / 100;
 
-	console.log(decreasePercent+"% from "+ priceBeforeDecrease +" to "+price);
+	var price = distancePrice + volumePrice;
 
-	e.price = price;
+	delivery.price = price;
+
+	var commission = price / 100 * 30;
+
+	var insurance = commission / 2;
+	var treasury = Math.trunc(distance / 500);
+	var convargo = price - commission - insurance - treasury;
+
+	delivery.commission.insurance = insurance;
+	delivery.commission.treasury = treasury;
+	delivery.commission.convargo = convargo;
 }
 
-deliveries.forEach(function(e){
-	//stepOne(e);
-	stepTwo(e);
-	console.log(e);
+deliveries.forEach(function(delivery){
+	calculate(delivery);
+	console.log(delivery);	
 });
