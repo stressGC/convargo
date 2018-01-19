@@ -161,9 +161,13 @@ function calculate(delivery){
 	var trucker = getTrucker(delivery.truckerId);
 
 	var distance = delivery.distance;
-	var distancePrice = distance * trucker.pricePerKm;
-
 	var volume = delivery.volume;
+
+	var additionalCharge = 0;
+
+	var deductibleOption = delivery.options.deductibleReduction;
+
+	var distancePrice = distance * trucker.pricePerKm;
 
 	var decreasePercent = 0;
 
@@ -184,14 +188,22 @@ function calculate(delivery){
 
 	var price = distancePrice + volumePrice;
 
-	delivery.price = price;
-
 	var commission = price / 100 * 30;
 
 	var insurance = commission / 2;
-	var treasury = Math.trunc(distance / 500);
-	var convargo = price - commission - insurance - treasury;
+	var treasury = 1 + Math.trunc(distance / 500);
+	var convargo = commission - insurance - treasury;
 
+	console.log(price);
+
+	if(deductibleOption)
+	{
+		price += volume;
+		convargo += volume;
+	}
+
+	console.log(price);
+	delivery.price = price;
 	delivery.commission.insurance = insurance;
 	delivery.commission.treasury = treasury;
 	delivery.commission.convargo = convargo;
